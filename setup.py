@@ -4,11 +4,11 @@ from setuptools import setup
 
 setup(
     name='Flask-GoogleAuth',
-    version='0.3',
-    url='https://github.com/sashka/flask-googleauth',
+    version='0.3.0.1',
+    url='https://github.com/runscope/flask-googleauth',
     license='BSD',
-    author='Alexander Saltanov',
-    author_email='asd@mokote.com',
+    author='Ryan Park',
+    author_email='ryan@runscope.com',
     description='Super simple OpenID and Google Federated Auth for Flask apps.',
     long_description=open('README.rst', 'r').read(),
     py_modules=['flask_googleauth'],
