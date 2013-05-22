@@ -223,6 +223,7 @@ class GoogleAuth(OpenIdMixin):
         self.name = name
         self.cookie_name = cookie_name
         self.required = required
+        self.auth_not_required = []
 
         if app:
             self.init_app(app, url_prefix, name)
@@ -234,13 +235,15 @@ class GoogleAuth(OpenIdMixin):
         blueprint = Blueprint(name, __name__, url_prefix=url_prefix)
         blueprint.add_url_rule("/login/", "login", self._login, methods=["GET", "POST"])
         blueprint.add_url_rule("/logout/", "logout", self._logout, methods=["GET", "POST"])
+        self.auth_not_required.append("%s.login" % blueprint.name)
+        self.auth_not_required.append("%s.logout" % blueprint.name)
 
         app.register_blueprint(blueprint)
         app.before_request(self._before_request)
         app.extensions['googleauth'] = ObjectDict(blueprint=blueprint)
 
     def _before_request(self):
-        if self.required and not self._check_auth():
+        if self.required and request.endpoint not in self.auth_not_required and not self._check_auth():
             blueprint = current_app.extensions['googleauth'].blueprint
             return redirect(url_for("%s.login" % blueprint.name, next=request.url))
         g.user = None
