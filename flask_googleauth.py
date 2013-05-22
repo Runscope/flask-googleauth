@@ -203,15 +203,18 @@ class GoogleAuth(OpenIdMixin):
     response with get_authenticated_user(). We send a dict containing the
     values for the user, including 'email', 'name', 'locale', and 'identity'.
 
+    You can invalidate old sessions by adjusting the cookie_name parameter.
+
     See also: https://developers.google.com/accounts/docs/OpenID
     """
 
     _OPENID_ENDPOINT = "https://www.google.com/accounts/o8/ud"
 
-    def __init__(self, app=None, url_prefix=None, name="GoogleAuth"):
+    def __init__(self, app=None, url_prefix=None, name="GoogleAuth", cookie_name="openid"):
         self.app = app
         self.url_prefix = url_prefix
         self.name = name
+        self.cookie_name = cookie_name
 
         if app:
             self.init_app(app, url_prefix, name)
@@ -230,8 +233,8 @@ class GoogleAuth(OpenIdMixin):
 
     def _before_request(self):
         g.user = None
-        if "openid" in session:
-            g.user = session["openid"]
+        if self.cookie_name in session:
+            g.user = session[self.cookie_name]
 
     def _login(self):
         if request.args.get("openid.mode", None):
@@ -249,18 +252,18 @@ class GoogleAuth(OpenIdMixin):
             # Google auth failed.
             login_error.send(app, user=None)
             abort(403)
-        session["openid"] = user
+        session[self.cookie_name] = user
         login.send(app, user=user)
         return redirect(request.args.get("next", None) or request.referrer or "/")
 
     def _logout(self):
-        user = session.pop("openid", None)
+        user = session.pop(self.cookie_name, None)
         app = current_app._get_current_object()
         logout.send(app, user=user)
         return redirect(request.args.get("next", None) or "/")
 
     def _check_auth(self):
-        return "openid" in session
+        return self.cookie_name in session
 
     def required(self, fn):
         """Request decorator. Forces authentication."""
@@ -278,7 +281,7 @@ class GoogleFederated(GoogleAuth):
     Super simple Google Federated Auth for a given domain.
     """
 
-    def __init__(self, domain, app=None, url_prefix=None, name='GoogleAuth'):
+    def __init__(self, domain, app=None, url_prefix=None, name='GoogleAuth', cookie_name="openid"):
         self._OPENID_ENDPOINT = "https://www.google.com/a/%s/o8/ud?be=o8" % domain
-        super(GoogleFederated, self).__init__(app, url_prefix, name)
+        super(GoogleFederated, self).__init__(app, url_prefix, name, cookie_name)
 
