@@ -13,6 +13,8 @@ Changes in Runscope fork
    remove an authorized user from Google Apps. (Once the auth cookie is set,
    the extension never re-confirms with Google. If a user leaves the company,
    this is currently the only way to invalidate their existing sessions.)
+2. Require auth for all endpoints in an app, by adding required=True to the
+   auth object constructor.
 
 
 Feature requests for Runscope fork
