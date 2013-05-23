@@ -235,6 +235,7 @@ class GoogleAuth(OpenIdMixin):
         blueprint = Blueprint(name, __name__, url_prefix=url_prefix)
         blueprint.add_url_rule("/login/", "login", self._login, methods=["GET", "POST"])
         blueprint.add_url_rule("/logout/", "logout", self._logout, methods=["GET", "POST"])
+        blueprint.add_url_rule("/auth/", "auth", self._auth, methods=["GET"])
         self.auth_not_required.append("%s.login" % blueprint.name)
         self.auth_not_required.append("%s.logout" % blueprint.name)
 
@@ -249,6 +250,12 @@ class GoogleAuth(OpenIdMixin):
         g.user = None
         if self.cookie_name in session:
             g.user = session[self.cookie_name]
+
+    def _auth(self):
+        if self._check_auth():
+            return "OK", 200
+        else:
+            return "Unauthorized", 401
 
     def _login(self):
         if request.args.get("openid.mode", None):

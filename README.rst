@@ -15,6 +15,10 @@ Changes in Runscope fork
    this is currently the only way to invalidate their existing sessions.)
 2. Require auth for all endpoints in an app, by adding required=True to the
    auth object constructor.
+3. Adds /auth/ endpoint, which can be used with the nginx module
+   http_auth_request to authenticate other endpoints outside Flask. /auth/
+   returns a 200 OK response if the user's session can be authenticated, and
+   401 Unauthorized if it cannot.
 
 
 Feature requests for Runscope fork
