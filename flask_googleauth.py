@@ -238,6 +238,7 @@ class GoogleAuth(OpenIdMixin):
         blueprint.add_url_rule("/auth/", "auth", self._auth, methods=["GET"])
         self.auth_not_required.append("%s.login" % blueprint.name)
         self.auth_not_required.append("%s.logout" % blueprint.name)
+        self.auth_not_required.append("%s.auth" % blueprint.name)
 
         app.register_blueprint(blueprint)
         app.before_request(self._before_request)
