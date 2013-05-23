@@ -19,6 +19,11 @@ Changes in Runscope fork
    http_auth_request to authenticate other endpoints outside Flask. /auth/
    returns a 200 OK response if the user's session can be authenticated, and
    401 Unauthorized if it cannot.
+4. Adds token-based authentication for API access, by way of an Authentication
+   header. If session-based auth fails, we check for an Authorization header
+   matching this pattern: "Authorization: token <TOKEN-VALUE>". A list of valid
+   tokens are currently hard-coded in the extension, but this will eventually
+   be modified to pull from an internal Runscope service.
 
 
 Feature requests for Runscope fork

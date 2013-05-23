@@ -38,6 +38,13 @@ login = signals.signal("login")
 logout = signals.signal("logout")
 login_error = signals.signal("login-error")
 
+AUTH_TOKENS = ['34a33b9be4725ef829aab4772a9d4e7058ce1975',  # used by Puppet and ops-tools
+               '1935456fb0210eb6e72f3c49d5e02a3fcaa694a4',  # unused
+               'b0a7227a7663b60744e8b61fc0c7b8ceda1af5fa',  # unused
+               '35d9b5bdbdf83b8b8a352c25090b67b5ebfe8f96',  # unused
+               'e2be6fc8c19fcfaa60cef559c33f1d8600fa4640'   # unused
+              ]
+
 
 class ObjectDict(dict):
     """Makes a dictionary behave like an object."""
@@ -285,7 +292,15 @@ class GoogleAuth(OpenIdMixin):
         return redirect(request.args.get("next", None) or "/")
 
     def _check_auth(self):
-        return self.cookie_name in session
+        if self.cookie_name in session:
+            return True
+        if "Authorization" in request.headers:
+            v = request.headers['Authorization']
+            if v.startswith("token "):
+                token = v[6:]
+                if token in AUTH_TOKENS:
+                    return True
+        return False
 
     def required(self, fn):
         """Request decorator. Forces authentication."""
