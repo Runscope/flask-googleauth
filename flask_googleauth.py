@@ -38,13 +38,6 @@ login = signals.signal("login")
 logout = signals.signal("logout")
 login_error = signals.signal("login-error")
 
-AUTH_TOKENS = ['34a33b9be4725ef829aab4772a9d4e7058ce1975',  # used by Puppet and ops-tools
-               '1935456fb0210eb6e72f3c49d5e02a3fcaa694a4',  # unused
-               'b0a7227a7663b60744e8b61fc0c7b8ceda1af5fa',  # unused
-               '35d9b5bdbdf83b8b8a352c25090b67b5ebfe8f96',  # unused
-               'e2be6fc8c19fcfaa60cef559c33f1d8600fa4640'   # unused
-              ]
-
 
 class ObjectDict(dict):
     """Makes a dictionary behave like an object."""
@@ -224,13 +217,14 @@ class GoogleAuth(OpenIdMixin):
 
     _OPENID_ENDPOINT = "https://www.google.com/accounts/o8/ud"
 
-    def __init__(self, app=None, url_prefix=None, name="GoogleAuth", cookie_name="openid", required=False):
+    def __init__(self, app=None, url_prefix=None, name="GoogleAuth", cookie_name="openid", required=False, access_tokens=[]):
         self.app = app
         self.url_prefix = url_prefix
         self.name = name
         self.cookie_name = cookie_name
         self.required = required
         self.auth_not_required = []
+        self.access_tokens = access_tokens
 
         if app:
             self.init_app(app, url_prefix, name)
@@ -298,7 +292,7 @@ class GoogleAuth(OpenIdMixin):
             v = request.headers['Authorization']
             if v.startswith("token "):
                 token = v[6:]
-                if token in AUTH_TOKENS:
+                if token in self.access_tokens:
                     return True
         return False
 
@@ -321,7 +315,7 @@ class GoogleFederated(GoogleAuth):
     Super simple Google Federated Auth for a given domain.
     """
 
-    def __init__(self, domain, app=None, url_prefix=None, name='GoogleAuth', cookie_name="openid", required=False):
+    def __init__(self, domain, app=None, url_prefix=None, name='GoogleAuth', cookie_name="openid", required=False, access_tokens=[]):
         self._OPENID_ENDPOINT = "https://www.google.com/a/%s/o8/ud?be=o8" % domain
-        super(GoogleFederated, self).__init__(app, url_prefix, name, cookie_name, required)
+        super(GoogleFederated, self).__init__(app, url_prefix, name, cookie_name, required, access_tokens)
 
