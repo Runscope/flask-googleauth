@@ -208,7 +208,7 @@ class GoogleAuth(OpenIdMixin):
     By default, authentication is not required on any endpoints. You can opt-in
     specific endpoints by using the decorator @auth.required.
 
-    You can require auth on all endpoints, by setting the parameter 'required'
+    You can require auth on all endpoints, by setting the parameter 'force'
     to True. However, there's no way to bypass this setting -- every page in
     the entire app will require login.
 
@@ -315,7 +315,7 @@ class GoogleFederated(GoogleAuth):
     Super simple Google Federated Auth for a given domain.
     """
 
-    def __init__(self, domain, app=None, url_prefix=None, name='GoogleAuth', cookie_name="openid", required=False, access_tokens=[]):
+    def __init__(self, domain, app=None, url_prefix=None, name='GoogleAuth', cookie_name="openid", force=False, access_tokens=[]):
         self._OPENID_ENDPOINT = "https://www.google.com/a/%s/o8/ud?be=o8" % domain
-        super(GoogleFederated, self).__init__(app, url_prefix, name, cookie_name, required, access_tokens)
+        super(GoogleFederated, self).__init__(app, url_prefix, name, cookie_name, force, access_tokens)
 
