@@ -208,7 +208,7 @@ class GoogleAuth(OpenIdMixin):
     By default, authentication is not required on any endpoints. You can opt-in
     specific endpoints by using the decorator @auth.required.
 
-    You can require auth on all endpoints, by setting the parameter 'required'
+    You can require auth on all endpoints, by setting the parameter 'force'
     to True. However, there's no way to bypass this setting -- every page in
     the entire app will require login.
 
@@ -217,12 +217,12 @@ class GoogleAuth(OpenIdMixin):
 
     _OPENID_ENDPOINT = "https://www.google.com/accounts/o8/ud"
 
-    def __init__(self, app=None, url_prefix=None, name="GoogleAuth", cookie_name="openid", required=False, access_tokens=[]):
+    def __init__(self, app=None, url_prefix=None, name="GoogleAuth", cookie_name="openid", force=False, access_tokens=[]):
         self.app = app
         self.url_prefix = url_prefix
         self.name = name
         self.cookie_name = cookie_name
-        self.required = required
+        self.force = force
         self.auth_not_required = []
         self.access_tokens = access_tokens
 
@@ -246,7 +246,7 @@ class GoogleAuth(OpenIdMixin):
         app.extensions['googleauth'] = ObjectDict(blueprint=blueprint)
 
     def _before_request(self):
-        if self.required and request.endpoint not in self.auth_not_required and not self._check_auth():
+        if self.force and request.endpoint not in self.auth_not_required and not self._check_auth():
             blueprint = current_app.extensions['googleauth'].blueprint
             return redirect(url_for("%s.login" % blueprint.name, next=request.url))
         g.user = None
@@ -298,7 +298,7 @@ class GoogleAuth(OpenIdMixin):
 
     def required(self, fn):
         """Request decorator. Forces authentication."""
-        if self.required:
+        if self.force:
             # Auth is required on all pages, so this decorator can be ignored.
             return
         @functools.wraps(fn)
@@ -315,7 +315,7 @@ class GoogleFederated(GoogleAuth):
     Super simple Google Federated Auth for a given domain.
     """
 
-    def __init__(self, domain, app=None, url_prefix=None, name='GoogleAuth', cookie_name="openid", required=False, access_tokens=[]):
+    def __init__(self, domain, app=None, url_prefix=None, name='GoogleAuth', cookie_name="openid", force=False, access_tokens=[]):
         self._OPENID_ENDPOINT = "https://www.google.com/a/%s/o8/ud?be=o8" % domain
-        super(GoogleFederated, self).__init__(app, url_prefix, name, cookie_name, required, access_tokens)
+        super(GoogleFederated, self).__init__(app, url_prefix, name, cookie_name, force, access_tokens)
 
