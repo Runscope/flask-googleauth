@@ -28,11 +28,9 @@ Changes in Runscope fork
 
 Feature requests for Runscope fork
 ----------------------------------
-1. Support token-based auth for scripts that interact with APIs. We'll need to
-   validate the tokens with a database (maybe identity?) or hard-code the valid
-   tokens into this script.
-2. Load a list of valid users from a database. This would let us limit certain
-   services to authorized employees, or remove a user who's left the company.
+1. Load a list of valid users from a database (or even just a configuration
+   variable). This would let us limit certain services to authorized employees,
+   or remove a user who's left the company.
 
 
 Usage
