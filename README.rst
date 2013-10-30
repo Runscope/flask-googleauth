@@ -3,9 +3,11 @@ Flask-GoogleAuth
 This is a partial port of torando.auth to be used with Flask.
 
 It is small, self contained and do not use any filesystem operations.
-Greate for internal apps.
+Great for internal apps.
 
 Written by Alexander Saltanov, inspired by Kenneth Reitz.
+
+The Runscope fork is maintained by Ryan Park.
 
 
 Changes in Runscope fork
@@ -22,18 +24,16 @@ Changes in Runscope fork
    http_auth_request to authenticate other endpoints outside Flask. /auth/
    returns a 200 OK response if the user's session can be authenticated, and
    401 Unauthorized if it cannot.
-4. Adds token-based authentication for API access, by way of an Authentication
+4. Adds token-based authentication for API access, by way of an Authorization
    header. If session-based auth fails, we check for an Authorization header
    matching this pattern: "Authorization: token <TOKEN-VALUE>". A list of valid
-   tokens are currently hard-coded in the extension, but this will eventually
-   be modified to pull from an internal Runscope service.
-
-
-Feature requests for Runscope fork
-----------------------------------
-1. Load a list of valid users from a database (or even just a configuration
-   variable). This would let us limit certain services to authorized employees,
-   or remove a user who's left the company.
+   tokens can be specified in the access_tokens parameter when constructing a
+   GoogleAuth or GoogleFederated object.
+5. Adds the ability to specify a list of users who are authorized to use this
+   application. The authorized_users list should contain email addresses or
+   OpenID identity values for the authorized users. If authorized_users is not
+   specified, all Google Accounts for the given domain will be able to use the
+   application.
 
 
 Usage
