@@ -211,12 +211,20 @@ class GoogleAuth(OpenIdMixin):
     to True. However, there's no way to bypass this setting -- every page in
     the entire app will require login.
 
-    See also: https://developers.google.com/accounts/docs/OpenID
+    You can use the 'authorized_users' parameter to specify a list of users who
+    are authorized to use this application. The list should contain email
+    addresses or OpenID identity values for the authorized users. If
+    'authorized_users' is not specified, all Google Accounts for the given
+    domain will be able to use the application.
+
+    You can also specify a list of access tokens in the 'access_tokens'
+    parameter.  If session-based auth fails, we check for an Authorization
+    header matching this pattern: "Authorization: token <TOKEN-VALUE>".
     """
 
     _OPENID_ENDPOINT = "https://www.google.com/accounts/o8/ud"
 
-    def __init__(self, app=None, url_prefix=None, name="GoogleAuth", cookie_name="openid", force=False, access_tokens=[]):
+    def __init__(self, app=None, url_prefix=None, name="GoogleAuth", cookie_name="openid", force=False, access_tokens=[], authorized_users=None):
         self.app = app
         self.url_prefix = url_prefix
         self.name = name
@@ -224,6 +232,7 @@ class GoogleAuth(OpenIdMixin):
         self.force = force
         self.auth_not_required = []
         self.access_tokens = access_tokens
+        self.authorized_users = authorized_users
 
         if app:
             self.init_app(app, url_prefix, name)
@@ -286,7 +295,7 @@ class GoogleAuth(OpenIdMixin):
 
     def _check_auth(self):
         if self.cookie_name in session:
-            return True
+            return self._is_authorized(session[self.cookie_name])
         if "Authorization" in request.headers:
             v = request.headers['Authorization']
             if v.startswith("token "):
@@ -294,6 +303,17 @@ class GoogleAuth(OpenIdMixin):
                 if token in self.access_tokens:
                     return True
         return False
+
+    def _is_authorized(self, user):
+        """Determines if the given user is a valid user for this application."""
+        if self.authorized_users is None:
+            return True
+        elif 'email' in user and user['email'] in self.authorized_users:
+            return True
+        elif 'identity' in user and user['identity'] in self.authorized_users:
+            return True
+        else:
+            return False
 
     def required(self, fn):
         """Request decorator. Forces authentication."""
@@ -314,6 +334,6 @@ class GoogleFederated(GoogleAuth):
     Super simple Google Federated Auth for a given domain.
     """
 
-    def __init__(self, domain, app=None, url_prefix=None, name='GoogleAuth', cookie_name="openid", force=False, access_tokens=[]):
+    def __init__(self, domain, app=None, url_prefix=None, name='GoogleAuth', cookie_name="openid", force=False, access_tokens=[], authorized_users=None):
         self._OPENID_ENDPOINT = "https://www.google.com/a/%s/o8/ud?be=o8" % domain
-        super(GoogleFederated, self).__init__(app, url_prefix, name, cookie_name, force, access_tokens)
+        super(GoogleFederated, self).__init__(app, url_prefix, name, cookie_name, force, access_tokens, authorized_users)
